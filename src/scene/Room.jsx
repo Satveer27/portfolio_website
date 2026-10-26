@@ -5,18 +5,20 @@ import * as THREE from 'three'
 import { useStore } from '../store'
 import { Hotspot, Model, useOptionalTexture } from './common'
 import { decor } from '../data'
-import { plasterTex, rugTex, posterTex, windowTex, kitTex, printTex, mangaPosterTex, certTex } from './textures'
+import { posterTex, windowTex, kitTex, printTex, mangaPosterTex, certTex } from './textures'
 
 const W = 2.4 // half width
 const BACK = -1.4
 
 export function Room() {
-  const [woodMap, woodBump, woodRough] = useTexture(['textures/wood_diffuse.jpg', 'textures/wood_bump.jpg', 'textures/wood_rough.jpg'])
+  const [floor, plaster, rug] = useTexture(['textures/floor.jpg', 'textures/plaster.jpg', 'textures/rug.jpg'])
   useMemo(() => {
-    ;[woodMap, woodBump, woodRough].forEach((t) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 3); t.anisotropy = 8 })
-    woodMap.colorSpace = THREE.SRGBColorSpace
-  }, [woodMap, woodBump, woodRough])
-  const tex = useMemo(() => ({ plaster: plasterTex(), rug: rugTex(), poster: posterTex(), night: windowTex(false), day: windowTex(true), kit: kitTex(decor.kit), print: printTex(decor.print), manga: mangaPosterTex(), cert: certTex() }), [])
+    // photo textures: mirrored repeats hide the tile seams
+    floor.wrapS = floor.wrapT = THREE.MirroredRepeatWrapping; floor.repeat.set(3, 3)
+    plaster.wrapS = plaster.wrapT = THREE.MirroredRepeatWrapping; plaster.repeat.set(2, 1.2)
+    ;[floor, plaster, rug].forEach((t) => { t.anisotropy = 8; t.colorSpace = THREE.SRGBColorSpace })
+  }, [floor, plaster, rug])
+  const tex = useMemo(() => ({ poster: posterTex(), night: windowTex(false), day: windowTex(true), kit: kitTex(decor.kit), print: printTex(decor.print), manga: mangaPosterTex(), cert: certTex() }), [])
   const kitMap = useOptionalTexture(decor.kit.photo, tex.kit)
   const printMap = useOptionalTexture(decor.print.photo, tex.print)
   const night = useStore((s) => s.night)
@@ -28,17 +30,18 @@ export function Room() {
       {/* floor */}
       <mesh rotation-x={-Math.PI / 2} position={[0, 0, 0.8]} receiveShadow>
         <planeGeometry args={[W * 2, 4.6]} />
-        <meshStandardMaterial map={woodMap} bumpMap={woodBump} bumpScale={0.6} roughnessMap={woodRough} roughness={0.85} color="#b98d68" envMapIntensity={0.6} />
+        <meshStandardMaterial map={floor} roughness={0.7} color="#f2e8da" envMapIntensity={0.5} />
       </mesh>
       {/* rug */}
       <mesh rotation-x={-Math.PI / 2} position={[0.1, 0.004, 0.25]} receiveShadow>
         <planeGeometry args={[2.3, 1.7]} />
-        <meshStandardMaterial map={tex.rug} roughness={1} />
+        <meshStandardMaterial map={rug} roughness={1} />
       </mesh>
       {/* walls + ceiling */}
-      <mesh position={[0, 1.45, BACK]} receiveShadow><planeGeometry args={[W * 2, 2.9]} /><meshStandardMaterial map={tex.plaster} roughness={0.95} color="#cdb8a4" /></mesh>
-      <mesh position={[-W, 1.45, 0.8]} rotation-y={Math.PI / 2} receiveShadow><planeGeometry args={[4.6, 2.9]} /><meshStandardMaterial map={tex.plaster} roughness={0.95} color="#c4ae99" /></mesh>
-      <mesh position={[W, 1.45, 0.8]} rotation-y={-Math.PI / 2} receiveShadow><planeGeometry args={[4.6, 2.9]} /><meshStandardMaterial map={tex.plaster} roughness={0.95} color="#c4ae99" /></mesh>
+      <mesh position={[0, 1.45, BACK]} receiveShadow><planeGeometry args={[W * 2, 2.9]} /><meshStandardMaterial map={plaster} roughness={0.92} color="#ddc9b2" /></mesh>
+      <mesh position={[-W, 1.45, 0.8]} rotation-y={Math.PI / 2} receiveShadow><planeGeometry args={[4.6, 2.9]} /><meshStandardMaterial map={plaster} roughness={0.92} color="#d3bea8" /></mesh>
+      <mesh position={[W, 1.45, 0.8]} rotation-y={-Math.PI / 2} receiveShadow><planeGeometry args={[4.6, 2.9]} /><meshStandardMaterial map={plaster} roughness={0.92} color="#d3bea8" /></mesh>
+      <mesh position={[0, 1.45, 3.1]} rotation-y={Math.PI} receiveShadow><planeGeometry args={[W * 2, 2.9]} /><meshStandardMaterial map={plaster} roughness={0.92} color="#d3bea8" /></mesh>
       <mesh position={[0, 2.9, 0.8]} rotation-x={Math.PI / 2}><planeGeometry args={[W * 2, 4.6]} /><meshStandardMaterial color="#2a211b" roughness={1} /></mesh>
       {/* skirting */}
       <mesh position={[0, 0.05, BACK + 0.01]}><boxGeometry args={[W * 2, 0.1, 0.02]} /><meshStandardMaterial color="#efe8dc" roughness={0.5} /></mesh>
@@ -94,13 +97,15 @@ export function Room() {
 }
 
 function Curtain({ z }) {
+  const linen = useTexture('textures/linen.jpg')
+  useMemo(() => { linen.wrapS = linen.wrapT = THREE.RepeatWrapping; linen.repeat.set(1, 3); linen.colorSpace = THREE.SRGBColorSpace }, [linen])
   const geo = useMemo(() => {
     const g = new THREE.PlaneGeometry(0.34, 2.05, 24, 1)
     const p = g.attributes.position
     for (let i = 0; i < p.count; i++) { const x = p.getX(i); p.setZ(i, Math.sin(x * 46) * 0.018) }
     g.computeVertexNormals(); return g
   }, [])
-  return <mesh geometry={geo} position={[0.12, 1.45, z]} rotation-y={Math.PI / 2} castShadow receiveShadow><meshStandardMaterial color="#6b5544" roughness={1} side={THREE.DoubleSide} /></mesh>
+  return <mesh geometry={geo} position={[0.12, 1.45, z]} rotation-y={Math.PI / 2} castShadow receiveShadow><meshStandardMaterial map={linen} color="#c9b8a2" roughness={1} side={THREE.DoubleSide} /></mesh>
 }
 
 function StringLights() {

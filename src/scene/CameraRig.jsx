@@ -13,10 +13,10 @@ export const FOCUS = {
   computer: { pos: [0, 1.105, -0.72], look: [0, 1.105, -1.2] },
   board: { pos: [1.5, 1.47, -0.2], look: [1.5, 1.47, -1.38] },
   music: { pos: [0.95, 1.25, 0.55], look: [2.2, 0.85, 1.25] },
-  // side: on wide screens, slide the view so the object sits left of centre and the info card on the right doesn't cover it
-  cert: { pos: [1.2, 1.62, 0.35], look: [2.4, 1.62, 0.35], side: 0.31 },
+  // side: on wide screens, slide the view so the object sits left of centre and an info card on the right wouldn't cover it
+  cert: { pos: [1.2, 1.62, 0.35], look: [2.4, 1.62, 0.35] },
   // walk up to the bookshelf so the spines are readable; fitW keeps the whole shelf in view on narrow screens
-  shelf: { pos: [-1.6, 1.43, -0.37], look: [-1.6, 1.4, -1.21], fitW: 0.8 }
+  shelf: { pos: [-1.77, 1.43, -0.37], look: [-1.77, 1.4, -1.21], fitW: 0.5 }
 }
 
 // Arrow-pad presets (yaw, pitch) from the chair.
@@ -25,6 +25,8 @@ export const LOOKS = {
 }
 
 const lookState = { yawT: 0, pitchT: 0.05 }
+// #look-right (or left, cert, music, up, down) opens already facing that way
+if (typeof window !== 'undefined' && window.location.hash.startsWith('#look-') && LOOKS[window.location.hash.slice(6)]) [lookState.yawT, lookState.pitchT] = LOOKS[window.location.hash.slice(6)]
 export function lookAt(name) {
   const s = useStore.getState()
   if (!s.seated) s.sit()

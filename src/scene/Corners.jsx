@@ -6,7 +6,7 @@ import { useStore } from '../store'
 import { Hotspot, Model, flyStep } from './common'
 import { FOCUS } from './CameraRig'
 import { boardTex, spineHiTex, pagesTex, coverTex, bookCoverTex, recordTex } from './textures'
-import { books, manga, tracks } from '../data'
+import { shelf, tracks } from '../data'
 
 // ---------- whiteboard (projects / blueprints) ----------
 export function Whiteboard() {
@@ -35,12 +35,16 @@ export function Bookshelf() {
   const items = useMemo(() => {
     const out = []
     let x = SHELF.x - SHELF.w / 2 + 0.06
-    books.forEach((bk, i) => { const t = 0.04 + ((i * 37) % 10) * 0.003, h = 0.22 + ((i * 53) % 7) * 0.01; out.push({ ...bk, idx: out.length, x, t, h }); x += t + 0.004 })
-    x += 0.05
-    const m = manga[0]
-    for (let v = 1; v <= Math.min(4, m.vols); v++) { out.push({ title: m.title, by: `Vol. ${v}`, kind: 'manga', color: m.color, ink: m.ink, foot: String(v), why: '[WHAT GOT YOU INTO IT]', stuck: '[FAVOURITE ARC OR MOMENT]', status: '[VOLUMES READ]', idx: out.length, x, t: 0.03, h: 0.19 }); x += 0.033 }
+    shelf.forEach((bk, i) => {
+      const manga = bk.kind === 'manga'
+      const t = manga ? 0.034 + ((i * 37) % 4) * 0.003 : 0.045, h = manga ? 0.19 + ((i * 53) % 4) * 0.006 : 0.24
+      out.push({ ...bk, idx: out.length, x, t, h }); x += t + 0.006
+    })
     return out
   }, [])
+  // the book end sits right after the last book, so new books go on the right of it
+  const last = items[items.length - 1]
+  const endX = last.x + last.t + 0.014
   useMemo(() => { useStore.setState({ shelfItems: items }) }, [items])
   const open = useStore((s) => s.open)
   const z0 = SHELF.wall + SHELF.d / 2
@@ -53,7 +57,7 @@ export function Bookshelf() {
       <mesh position={[SHELF.x, SHELF.y, z0]} castShadow receiveShadow><boxGeometry args={[SHELF.w, 0.025, SHELF.d]} /><meshStandardMaterial map={wood} color="#6a4630" roughness={0.6} /></mesh>
       {[-0.32, 0.32].map((dx) => <mesh key={dx} position={[SHELF.x + dx, SHELF.y - 0.06, SHELF.wall + 0.06]}><boxGeometry args={[0.012, 0.1, 0.1]} /><meshStandardMaterial color="#1a1a1a" metalness={0.7} roughness={0.4} /></mesh>)}
       {/* book end */}
-      <mesh position={[SHELF.x + SHELF.w / 2 - 0.04, SHELF.y + 0.075, z0 + 0.01]} castShadow><boxGeometry args={[0.012, 0.13, 0.12]} /><meshStandardMaterial color="#1a1a1a" metalness={0.7} roughness={0.4} /></mesh>
+      <mesh position={[endX, SHELF.y + 0.075, z0 + 0.01]} castShadow><boxGeometry args={[0.012, 0.13, 0.12]} /><meshStandardMaterial color="#1a1a1a" metalness={0.7} roughness={0.4} /></mesh>
       {items.map((bk) => <Book key={bk.idx} b={bk} />)}
     </group>
   )
@@ -101,7 +105,7 @@ function Book({ b }) {
       flyStep(ref.current, pulled, false, camera, dt, { speed: 0.003 })
     }
   })
-  const label = b.kind === 'manga' ? `${b.title} · ${b.by}` : b.title
+  const label = b.title
   return (
     <Hotspot label={label} allow="shelf" onActivate={() => { const s = useStore.getState(); if (s.focus === 'shelf') s.open('book', { book: b.idx, fromShelf: true }); else s.open('shelf') }}>
       <mesh ref={ref} position={home.position} quaternion={home.quaternion} material={mats} castShadow receiveShadow>
@@ -126,7 +130,7 @@ export function MusicCorner() {
   })
   return (
     <group>
-      <RoundedBox args={[0.42, 0.55, 1.1]} radius={0.01} position={[2.17, 0.275, 1.25]} castShadow receiveShadow><meshStandardMaterial color="#2a1f18" roughness={0.55} /></RoundedBox>
+      <RoundedBox args={[0.42, 0.55, 1.1]} radius={0.01} position={[2.17, 0.275, 1.25]} castShadow receiveShadow><meshStandardMaterial map={wood} color="#8a6a52" roughness={0.6} /></RoundedBox>
       <mesh position={[1.955, 0.32, 1.25]}><boxGeometry args={[0.005, 0.004, 1.0]} /><meshStandardMaterial color="#b08a4a" metalness={0.9} roughness={0.3} /></mesh>
       <Hotspot label="Speaker · music" onActivate={() => open('music')}>
         <group ref={boom} position={[2.15, 0.55, 1.45]}>

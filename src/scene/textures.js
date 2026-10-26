@@ -308,3 +308,25 @@ export const recordTex = (t, i) => makeTex(1024, 1024, (g, w, h) => {
   g.fillStyle = '#d9d4cb'; g.beginPath(); g.arc(cx, cy, 11, 0, Math.PI * 2); g.fill()
   g.fillStyle = '#0a0a0b'; g.beginPath(); g.arc(cx, cy, 6, 0, Math.PI * 2); g.fill()
 })
+
+// Soft leaf-and-branch shadow, used as a spotlight gobo so sun through the window lands dappled on the desk.
+export const leafShadowTex = () => makeTex(512, 512, (g, w, h) => {
+  const r = rng(11)
+  g.fillStyle = '#fff'; g.fillRect(0, 0, w, h)
+  g.filter = 'blur(6px)'
+  g.fillStyle = '#2a2a2a'; g.strokeStyle = '#2a2a2a'
+  for (let b = 0; b < 6; b++) {
+    let x = r() * w, y = h * (0.1 + r() * 0.8), a = (r() - 0.5) * 1.2
+    g.lineWidth = 3 + r() * 3; g.beginPath(); g.moveTo(x, y)
+    for (let s = 0; s < 7; s++) {
+      x += Math.cos(a) * 55; y += Math.sin(a) * 55; a += (r() - 0.5) * 0.7
+      g.lineTo(x, y)
+      for (const side of [-1, 1]) {
+        g.save(); g.translate(x, y); g.rotate(a + side * (0.8 + r() * 0.5)); g.scale(1, 0.42)
+        g.beginPath(); g.arc(26, 0, 26 + r() * 10, 0, Math.PI * 2); g.fill(); g.restore()
+      }
+    }
+    g.stroke()
+  }
+  g.filter = 'none'
+})

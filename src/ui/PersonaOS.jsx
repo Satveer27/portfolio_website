@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store'
-import { experience, profile, skills, journey, skillIcons } from '../data'
+import { experience, education, profile, skills, journey, skillIcons } from '../data'
 import './persona.css'
 
 const FONTS = ["'Anton', sans-serif", "'Archivo Black', sans-serif", "'DM Serif Display', serif", "'JetBrains Mono', monospace"]
@@ -27,12 +27,13 @@ export function Ransom({ word, seed = 3, size = 74 }) {
 
 const MENU = [
   { key: 'experience', label: 'Experience', sub: 'WHERE I WORKED' },
+  { key: 'education', label: 'Education', sub: 'YEAR BY YEAR' },
   { key: 'skills', label: 'Skills', sub: 'MY LOADOUT' },
   { key: 'whoami', label: 'Who am I', sub: 'THE PERSON BEHIND IT' },
   { key: 'contact', label: 'Contact', sub: 'GET IN TOUCH' },
   { key: 'leave', label: 'Leave', sub: 'BACK TO THE ROOM' }
 ]
-const TITLES = { menu: ['SAT//OS', 'MAIN MENU'], experience: ['EXPERIENCE', 'TRACK RECORD'], whoami: ['WHO AM I', 'STATUS'], contact: ['CONTACT', 'CALLING CARD'], skills: ['SKILLS', 'LOADOUT'] }
+const TITLES = { menu: ['SAT//OS', 'MAIN MENU'], experience: ['EXPERIENCE', 'TRACK RECORD'], education: ['EDUCATION', 'UNIVERSITY OF GLASGOW'], whoami: ['WHO AM I', 'STATUS'], contact: ['CONTACT', 'CALLING CARD'], skills: ['SKILLS', 'LOADOUT'] }
 
 // Original line icons, a different one for every skill (drawn here, not brand logos).
 const GLYPHS = {
@@ -47,13 +48,23 @@ const GLYPHS = {
   Django: 'M12 3l9 5-9 5-9-5zM3 12.5l9 5 9-5M3 16.5l9 5 9-5',
   'REST APIs': 'M4 8h15l-3-3M20 16H5l3 3',
   PostgreSQL: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
-  'Queues and retries': 'M3 6h12M3 12h12M3 18h12M18 9l3 3-3 3',
+  Celery: 'M3 6h12M3 12h12M3 18h12M18 9l3 3-3 3',
+  Redis: 'M12 3l9 4-9 4-9-4zM3 12l9 4 9-4M3 17l9 4 9-4',
+  Airflow: 'M4 6h5v4H4zM15 4h5v4h-5zM15 16h5v4h-5zM9 8h3l3-2M12 8v8h3',
+  pandas: 'M5 4v16M9 8v12M13 4v16M17 10v10M21 6v14',
+  'scikit-learn': 'M4 20l5-9 4 5 7-12M4 20h16',
+  'Hugging Face models': 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M8.5 10h.01M15.5 10h.01M8 14c1 2 7 2 8 0',
+  SVM: 'M4 20L20 4M4 14l10-10M10 20L20 10',
+  OpenCV: 'M3 12c3-5 15-5 18 0-3 5-15 5-18 0zM12 9.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5',
+  SwiftUI: 'M4 5h16v14H4zM4 10h16M9 10v9',
+  'React Native': 'M8 3h8v18H8zM11 18h2',
+  Redux: 'M12 3a9 9 0 1 0 9 9M21 3v6h-6',
   Scraping: 'M10 4a6 6 0 1 0 0 12a6 6 0 1 0 0-12zM14.5 14.5L20 20M7 10h6',
   XGBoost: 'M4 20v-6M10 20v-10M16 20V6M3 20h18M14 4l3-2 3 2',
   'Random Forest': 'M7 3l-4 8h8zM7 11v10M17 3l-4 8h8zM17 11v10',
   'Signal processing': 'M2 12h3l2-6 3 12 3-9 2 5 2-2h5',
   'Feature engineering': 'M4 6h16M4 12h16M4 18h16M9 4v4M15 10v4M7 16v4',
-  'AWS (EC2)': 'M4 4h16v6H4zM4 14h16v6H4zM7.5 7h.01M7.5 17h.01M12 7h4M12 17h4',
+  EC2: 'M4 4h16v6H4zM4 14h16v6H4zM7.5 7h.01M7.5 17h.01M12 7h4M12 17h4',
   Azure: 'M7 18h10a4 4 0 0 0 0-8a6 6 0 0 0-11.5 1.5A3.5 3.5 0 0 0 7 18z',
   Docker: 'M2 9h20v10H2zM6 9v10M10 9v10M14 9v10M18 9v10M8 5h8v4',
   DigitalOcean: 'M2 8c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 13c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 18c2-2 4-2 6 0s4 2 6 0 4-2 6 0',
@@ -108,7 +119,7 @@ function Journey({ mobile }) {
   const dur = Math.max(6, journey.length * 2.2)
   return (
     <div className="p5-journey rise">
-      <div className="jt"><span>TRAVEL LOG</span><small>{journey.filter((x) => !x.next).length} stops so far</small></div>
+      <div className="jt"><span>MY JOURNEY</span><small>{journey.filter((x) => !x.next).length} places so far</small></div>
       <div className="jmap">
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label={'My journey: ' + journey.map((x) => x.place).join(', then ')}>
           <defs>
@@ -160,12 +171,12 @@ export function PersonaOS({ mobile = false }) {
 
   const go = (key) => {
     if (key === 'leave') return close()
-    setScreen(key); setWipe((w) => w + 1)
+    setScreen(key); setWipe((w) => w + 1); setJob(0)
     if (root.current) root.current.scrollTop = 0
   }
   const step = (d) => {
     if (screen === 'menu') setSel((s) => (s + d + MENU.length) % MENU.length)
-    else if (screen === 'experience') setJob((j) => (j + d + experience.length) % experience.length)
+    else if (screen === 'experience' || screen === 'education') setJob((j) => (j + d + items.length) % items.length)
   }
   const onWheel = (e) => { const t = Date.now(); if (Math.abs(e.deltaY) < 4 || t - lastWheel.current < 280) return; lastWheel.current = t; step(e.deltaY > 0 ? 1 : -1) }
   useEffect(() => {
@@ -178,7 +189,8 @@ export function PersonaOS({ mobile = false }) {
   })
   const [title, sub] = TITLES[screen]
   const dows = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
-  const j = experience[job]
+  const items = screen === 'education' ? education : experience
+  const j = items[job] || items[0]
 
   return (
     <div ref={root} className={mobile ? 'p5 m' : 'p5'} onWheel={mobile ? undefined : onWheel}>
@@ -203,7 +215,7 @@ export function PersonaOS({ mobile = false }) {
           <p className="p5-intro">{profile.name}. {profile.role}. Python, FastAPI, data pipelines and ML that actually ships.</p>
           <nav className="p5-menu" aria-label="Main menu">
             {MENU.map((m, i) => (
-              <button key={m.key} className={'p5-mi' + (i === sel ? ' on' : '') + (m.key === 'leave' ? ' small' : '')} style={{ marginLeft: mobile ? 0 : [40, 0, 70, 20, 120][i], animationDelay: `${i * 0.06}s` }} onMouseEnter={() => setSel(i)} onFocus={() => setSel(i)} onClick={() => go(m.key)}>
+              <button key={m.key} className={'p5-mi' + (i === sel ? ' on' : '') + (m.key === 'leave' ? ' small' : '')} style={{ marginLeft: mobile ? 0 : [40, 0, 70, 20, 60, 120][i], animationDelay: `${i * 0.06}s` }} onMouseEnter={() => setSel(i)} onFocus={() => setSel(i)} onClick={() => go(m.key)}>
                 <span className="shadow" /><span className="plate" /><span className="cursor" />
                 <span className="label">{m.label}</span><span className="sub">{m.sub}</span>
               </button>
@@ -212,11 +224,11 @@ export function PersonaOS({ mobile = false }) {
         </>
       )}
 
-      {screen === 'experience' && (
+      {(screen === 'experience' || screen === 'education') && (
         <>
           <div className="p5-timeline" aria-hidden="true" />
           <div className="p5-jobs">
-            {experience.map((x, i) => (
+            {items.map((x, i) => (
               <div key={x.org} className="slam" style={{ animationDelay: `${i * 0.07}s` }}>
                 <button className={'p5-job' + (i === job ? ' on' : '')} style={{ transform: i === job ? (mobile ? 'translateX(6px) rotate(-1.5deg)' : 'translateX(24px) rotate(-2deg) scale(1.04)') : `rotate(${i % 2 ? 1 : -1}deg)` }} onMouseEnter={() => !mobile && setJob(i)} onClick={() => { setJob(i); if (mobile) setTimeout(() => dossier.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60) }}>
                   <span className="plate" /><span className="star" />
@@ -225,13 +237,14 @@ export function PersonaOS({ mobile = false }) {
               </div>
             ))}
           </div>
-          <article className="p5-dossier" key={'j' + job} ref={dossier}>
+          <article className={'p5-dossier' + (j.points ? ' dense' : '')} key={'j' + job} ref={dossier}>
             <div className="back" /><div className="front" />
             <div className="body">
-              <span className="tag">{j.kind} · {j.when}</span>
+              <span className="tag">{j.kind} · {j.when}{j.where ? ` · ${j.where.toUpperCase()}` : ''}</span>
               <h2>{j.org}</h2>
               <div className="role">{j.role}</div>
-              <p>{j.blurb}</p>
+              {j.figs && <div className="figs">{j.figs.map((f) => <div key={f.v}><b>{f.k}</b><span>{f.v}</span></div>)}</div>}
+              {j.points ? <ul className="points">{j.points.map((t, i) => <li key={i}>{t}</li>)}</ul> : <p>{j.blurb}</p>}
               <div className="stack">{j.stack.map((s) => <span key={s}>{s}</span>)}</div>
             </div>
           </article>
@@ -247,12 +260,11 @@ export function PersonaOS({ mobile = false }) {
             <div className="nameplate"><span>{profile.fullName}</span></div>
           </div>
           <div className="info">
-            <p className="bio rise">{profile.bio}</p>
+            <p className="bio rise">{profile.bio} {profile.offClock}</p>
             <div className="facts rise">
               <div><span>ROLE</span><b>{profile.role}</b></div>
               <div><span>BASED IN</span><b>{profile.basedIn}</b></div>
               <div><span>EDUCATION</span><b>MSci CS · Glasgow '26</b></div>
-              <div><span>LOOKING FOR</span><b>{profile.lookingFor}</b></div>
             </div>
             <Journey mobile={mobile} />
           </div>
@@ -265,12 +277,11 @@ export function PersonaOS({ mobile = false }) {
           <div className="paper"><div className="red">
             <div className="dots" />
             <Ransom word="LET'S TALK" seed={41} size={mobile ? 34 : 58} />
-            <p>{profile.role}, MSci CS from Glasgow, based in {profile.basedIn.split(',')[0]} and looking for roles in Malaysia. If you're hiring, I'd love to hear from you.</p>
+            <p>{profile.role}, MSci CS from the University of Glasgow. Got something to build? I'd love to hear about it.</p>
             <div className="links">
               <a href={profile.links.email}>Email</a>
               <a href={profile.links.github} target="_blank" rel="noreferrer">GitHub</a>
               <a href={profile.links.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
-              <a className="light" href={profile.links.cv} target="_blank" rel="noreferrer">Download CV</a>
             </div>
             <span className="from">FROM: SAT</span>
           </div></div>
@@ -278,7 +289,7 @@ export function PersonaOS({ mobile = false }) {
       )}
 
       <div className="p5-bar">
-        {screen === 'experience' && !mobile && <button className="p5-pill light" onClick={() => step(1)}><b>NEXT</b><small>scroll ↓</small></button>}
+        {(screen === 'experience' || screen === 'education') && !mobile && <button className="p5-pill light" onClick={() => step(1)}><b>NEXT</b><small>scroll ↓</small></button>}
         <button className="p5-pill" onClick={() => (screen === 'menu' ? close() : go('menu'))}><i>✕</i><b>{screen === 'menu' ? 'LEAVE' : 'BACK'}</b></button>
       </div>
 

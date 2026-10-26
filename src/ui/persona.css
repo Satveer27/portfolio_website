@@ -193,9 +193,25 @@
 .p5.m .p5-journey .jmap{height:auto;aspect-ratio:1000/680}
 .p5.m .jstop text{font-size:40px;stroke-width:8px}
 .p5.m .p5-card{position:relative;left:auto;top:auto;width:auto;height:auto;margin:24px 10px 0 0}
-.p5.m .p5-card .red{padding:30px 22px 24px;gap:16px}
+.p5.m .p5-card .paper{position:relative;inset:auto}
+.p5.m .p5-card .red{height:auto;padding:30px 22px 24px;gap:16px}
+.p5.m .p5-card .ransom{flex-wrap:wrap}
 .p5.m .p5-card p{font-size:16px}
 .p5.m .p5-card .links a{min-height:46px;padding:0 16px;font-size:16px}
 .p5.m .p5-card .from{top:12px;right:16px;font-size:14px}
 .p5.m .p5-bar{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:3}
 .p5.m .p5-wipe{position:fixed}
+
+/* experience: key figures + bullet points */
+.p5-dossier.dense .body{gap:12px;overflow-y:auto;scrollbar-width:none}
+.p5-dossier.dense h2{font-size:58px}
+.p5-dossier .figs{display:flex;flex-wrap:wrap;gap:12px}
+.p5-dossier .figs div{background:#fff;color:#0b0b0b;padding:6px 16px 7px;transform:skewX(-8deg);display:flex;flex-direction:column}
+.p5-dossier .figs b{font-family:'Anton',sans-serif;font-weight:400;font-size:36px;line-height:1;color:#d4001a}
+.p5-dossier .figs span{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700}
+.p5-dossier .points{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.p5-dossier .points li{position:relative;padding-left:22px;font-size:16px;line-height:1.45;color:#f2f2f2;font-weight:500}
+.p5-dossier .points li::before{content:'';position:absolute;left:0;top:.5em;width:10px;height:10px;background:#d4001a;transform:skewX(-12deg)}
+.p5.m .p5-dossier.dense h2{font-size:38px}
+.p5.m .p5-dossier .points li{font-size:14px}
+.p5.m .p5-dossier .figs b{font-size:28px}

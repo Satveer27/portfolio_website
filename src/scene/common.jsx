@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { useStore } from '../store'
@@ -35,13 +35,15 @@ export function Hotspot({ label, onActivate, children, allow, ...props }) {
 }
 
 // Loads a GLB, scales it so its height (or width) matches `height`/`width`, and sits it on the floor at its origin.
-export function Model({ url, height, width, rotation = [0, 0, 0], envIntensity = 1, ...props }) {
+// interactive={false}: the model is look-only and its meshes ignore the pointer (give it your own hit area)
+export function Model({ url, height, width, rotation = [0, 0, 0], envIntensity = 1, interactive = true, ...props }) {
   const { scene } = useGLTF(url)
   const obj = useMemo(() => {
     const root = scene.clone(true)
     root.traverse((m) => {
       if (m.isMesh) {
         m.castShadow = true; m.receiveShadow = true
+        if (!interactive) m.raycast = () => null
         if (m.material) {
           m.material = m.material.clone(); m.material.envMapIntensity = envIntensity
           // transmission needs an extra full render pass; fake glass with plain transparency instead
@@ -63,7 +65,7 @@ export function Model({ url, height, width, rotation = [0, 0, 0], envIntensity =
     const ctr = box.getCenter(new THREE.Vector3())
     root.position.x -= ctr.x; root.position.z -= ctr.z; root.position.y -= box.min.y
     return holder
-  }, [scene, height, width, envIntensity, rotation[0], rotation[1], rotation[2]])
+  }, [scene, height, width, envIntensity, interactive, rotation[0], rotation[1], rotation[2]])
   return <primitive object={obj} {...props} />
 }
 
@@ -94,11 +96,20 @@ export function homeOf(position, rotation = [0, 0, 0]) {
 useGLTF.preload('models/lamp.glb')
 useGLTF.preload('models/boombox.glb')
 useGLTF.preload('models/vase.glb')
+useGLTF.preload('models/mug.glb')
+useGLTF.preload('models/frame.glb')
+useGLTF.preload('models/monitor.glb')
+useGLTF.preload('models/keyboard.glb')
 
 // Loads an image from /public if it exists, otherwise keeps showing the canvas fallback.
 export function useOptionalTexture(url, fallback) {
-  return useMemo(() => {
-    if (url) new THREE.TextureLoader().load(url.replace(/^\//, ''), (tx) => { fallback.image = tx.image; fallback.needsUpdate = true }, undefined, () => {})
-    return fallback
-  }, [url, fallback])
+  const [tex, setTex] = useState(fallback)
+  useEffect(() => {
+    if (!url) return
+    let alive = true
+    // a real texture replaces the fallback; swapping the image inside the canvas texture breaks when the sizes differ
+    new THREE.TextureLoader().load(url.replace(/^\//, ''), (t) => { if (!alive) return; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; setTex(t) }, undefined, () => {})
+    return () => { alive = false }
+  }, [url])
+  return tex
 }

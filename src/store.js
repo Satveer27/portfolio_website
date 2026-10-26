@@ -2,24 +2,22 @@ import { create } from 'zustand'
 
 // focus: which object the camera is looking at (null = free look)
 // overlay: which UI is open on top of the scene
-const startView = () => {
-  if (typeof window === 'undefined') return 'room'
-  const h = window.location.hash.replace('#', '')
-  if (h === 'recruiter') return 'recruiter'
-  if (h === 'room') return 'room'
-  return window.matchMedia('(max-width: 760px), (pointer: coarse)').matches ? 'recruiter' : 'room'
-}
+// the plain Recruiter page is the default entrance; #room (and the debug shortcuts below) open the 3D room
+const ROOM_HASH = /^#(room|seated|os-|open-|look-)/
+const startView = () => (typeof window !== 'undefined' && ROOM_HASH.test(window.location.hash) ? 'room' : 'recruiter')
+
+const startSeated = typeof window !== 'undefined' && (window.location.hash === '#seated' || window.location.hash.startsWith('#os-') || window.location.hash.startsWith('#open-') || window.location.hash.startsWith('#look-'))
 
 export const useStore = create((set, get) => ({
   view: startView(), // 'room' (3D) or 'recruiter' (plain page)
   setView: (view) => { set({ view, overlay: null, focus: null, hover: null }); try { history.replaceState(null, '', '#' + view) } catch (e) {} },
-  progress: 0, // 0 = standing above the desk, 1 = sitting in the chair
-  seated: false,
+  progress: startSeated ? 1 : 0, // 0 = standing above the desk, 1 = sitting in the chair
+  seated: startSeated, // #seated in the URL opens already in the chair
   focus: null,
   overlay: null,
   hover: null, // { label, x, y }
   dragMoved: false,
-  night: true,
+  night: false, // golden-hour daylight by default; the window toggles night
   lampOn: true,
   coffee: 0,
   toast: null,
@@ -27,6 +25,7 @@ export const useStore = create((set, get) => ({
   // music
   album: 0,
   playing: false,
+  muted: false,
 
   // inspectables
   fromShelf: false,
@@ -61,3 +60,10 @@ export const useStore = create((set, get) => ({
     set({ toast: text, _toastT: setTimeout(() => set({ toast: null }), 2600) })
   }
 }))
+
+// #os-contact (or os-experience, os-education ...) opens the computer on that screen straight away; #open-frame, #open-board ... open that object
+if (typeof window !== 'undefined') {
+  const h = window.location.hash
+  if (h.startsWith('#os-')) setTimeout(() => useStore.getState().open('computer', { osScreen: h.slice(4) }), 600)
+  else if (h.startsWith('#open-')) setTimeout(() => useStore.getState().open(h.slice(6)), 600)
+}

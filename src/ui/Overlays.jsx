@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useProgress } from '@react-three/drei'
 import { useStore } from '../store'
 import { games, tracks, profile } from '../data'
-import { lookAt } from '../scene/CameraRig'
+import { startJazz, stopJazz } from '../scene/jazz'
 import { PersonaOS } from './PersonaOS'
 import { BlueprintView } from './BlueprintView'
 
@@ -47,6 +47,7 @@ export function HUD() {
   const hover = useStore((s) => s.hover)
   const toast = useStore((s) => s.toast)
   const playing = useStore((s) => s.playing)
+  const muted = useStore((s) => s.muted)
   const album = useStore((s) => s.album)
   const open = useStore((s) => s.open)
   const sit = useStore((s) => s.sit)
@@ -58,7 +59,7 @@ export function HUD() {
         <div className="intro-kicker">SATVEER GANASAN · PORTFOLIO</div>
         <h1>Come in, take a seat.</h1>
         <div className="intro-row"><button className="pill light" onClick={sit}>Sit down</button><span className="scroll-hint">or scroll<span className="mouse"><i /></span></span></div>
-        <button className="linkish" onClick={() => useStore.getState().setView('recruiter')}>In a hurry? Recruiter view →</button>
+        <button className="linkish" onClick={() => useStore.getState().setView('recruiter')}>Prefer a quick read? Recruiter view →</button>
       </div>
 
       {seated && !focus && !overlay && (
@@ -67,6 +68,7 @@ export function HUD() {
           <nav className="quick" aria-label="Sections">
             <button onClick={() => open('board')}>Projects</button>
             <button onClick={() => open('computer', { osScreen: 'experience' })}>Experience</button>
+            <button onClick={() => open('computer', { osScreen: 'education' })}>Education</button>
             <button onClick={() => open('computer', { osScreen: 'skills' })}>Skills</button>
             <button onClick={() => open('music')}>Music</button>
             <button onClick={() => open('shelf')}>Books</button>
@@ -74,19 +76,22 @@ export function HUD() {
             <button className="light" onClick={() => open('computer', { osScreen: 'contact' })}>Contact</button>
             <button onClick={() => useStore.getState().setView('recruiter')}>Recruiter view</button>
           </nav>
-          <div className="pad" aria-label="Look around">
-            <span /><button aria-label="Look up" onClick={() => lookAt('up')}>↑</button><span />
-            <button aria-label="Look left at the window" onClick={() => lookAt('left')}>←</button>
-            <button className="light" aria-label="Look at the desk" onClick={() => lookAt('front')}>DESK</button>
-            <button aria-label="Look right at the posters" onClick={() => lookAt('right')}>→</button>
-            <span /><button aria-label="Look down" onClick={() => lookAt('down')}>↓</button><span />
-          </div>
         </div>
       )}
 
       {hover && <div className="tip" style={{ left: hover.x, top: hover.y }}>{hover.label}</div>}
       {toast && <div className="toast fade-in">{toast}</div>}
-      {playing && overlay !== 'music' && <button className="nowplaying" onClick={() => open('music')}>♪ {tracks[album].title} · {tracks[album].artist}</button>}
+      {playing && (
+        <div className="np-group">
+          {overlay !== 'music' && <button className="nowplaying" onClick={() => open('music')}>♪ {tracks[album].title} · {tracks[album].artist}</button>}
+          <button className="mutebtn" aria-pressed={muted} aria-label={muted ? 'Unmute music' : 'Mute music'} onClick={() => useStore.setState({ muted: !muted })}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor" />
+              {muted ? <path d="M17 9l5 6M22 9l-5 6" /> : <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" />}
+            </svg>
+          </button>
+        </div>
+      )}
 
       {overlay === 'computer' && (narrow ? <PersonaOS mobile /> : <Fit><PersonaOS /></Fit>)}
       {overlay === 'board' && <Fit><BlueprintView /></Fit>}
@@ -140,6 +145,16 @@ function MusicHUD() {
         <h2>{t.title}</h2>
         <span className="artist">{t.artist}</span>
       </div>
+      <div className="playlist" aria-label="Playlist">
+        <span className="kicker">PLAYLIST · {tracks.length} TRACKS</span>
+        {tracks.map((x, i) => (
+          <button key={i} className={i === album ? 'on' : ''} onClick={() => (i === album ? useStore.setState({ playing: !playing }) : useStore.setState({ album: i, playing: true }))}>
+            <i style={{ background: `linear-gradient(135deg, ${x.colors[0]}, ${x.colors[1]})` }} />
+            <span><b>{x.title}</b><em>{x.artist}</em></span>
+            <u>{i === album && playing ? '❚❚' : '▶'}</u>
+          </button>
+        ))}
+      </div>
       <div className="music-controls">
         <button aria-label="Previous album" onClick={() => set(album - 1)}>‹</button>
         <button className="play" onClick={() => useStore.setState({ playing: !playing })}>{playing ? 'Pause' : 'Play'}</button>
@@ -151,21 +166,16 @@ function MusicHUD() {
 }
 
 export function Audio() {
-  const ref = useRef()
   const album = useStore((s) => s.album)
   const playing = useStore((s) => s.playing)
-  const [missing, setMissing] = useState(false)
-  useEffect(() => { setMissing(false) }, [album])
+  const muted = useStore((s) => s.muted)
+  // pressing play always brings the sound back
+  useEffect(() => { if (playing) useStore.setState({ muted: false }) }, [playing])
   useEffect(() => {
-    const a = ref.current; if (!a) return
-    if (playing) { const p = a.play(); if (p && p.catch) p.catch(() => {}) } else a.pause()
-  }, [playing, album])
-  return (
-    <>
-      <audio ref={ref} src={tracks[album].src.replace(/^\//, '')} onEnded={() => useStore.setState({ album: (album + 1) % tracks.length })} onError={() => setMissing(true)} preload="none" />
-      {missing && playing && <div className="toast fade-in">Add /public/{tracks[album].src} to play this one</div>}
-    </>
-  )
+    if (playing && !muted) startJazz(tracks[album].key); else stopJazz()
+    return stopJazz
+  }, [playing, muted, album])
+  return null
 }
 
 function FrameHUD() {
@@ -176,12 +186,7 @@ function FrameHUD() {
   return (
     <div className="inspect fade-in" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp}>
       <CloseBtn label="← Put it back" />
-      <div className="inspect-card">
-        <span className="kicker">ON THE DESK</span>
-        <h2>{profile.name}</h2>
-        <p>{profile.role}. {profile.degree}, {profile.uni}. Based in {profile.basedIn}.</p>
-        <span className="small">drag to turn the frame over</span>
-      </div>
+      <div className="music-hint">{TOUCH ? 'drag to turn the frame over' : 'drag to turn the frame over · esc to put it back'}</div>
     </div>
   )
 }
@@ -195,7 +200,6 @@ function CartHUD() {
       <div className="inspect-card cart">
         <span className="kicker">CARTRIDGE · SAT-0{(i ?? 0) + 1}</span>
         <h2>{g.title}</h2>
-        <div className="kv"><span>Hours</span><b>{g.hours}</b></div>
         <p>{g.note}</p>
         <div className="cart-nav">
           {games.map((x, k) => <button key={k} className={k === i ? 'on' : ''} onClick={() => useStore.setState({ cart: k })}>{k + 1}</button>)}
@@ -222,16 +226,14 @@ function BookReader() {
         <Wrap>
           <div className={narrow ? 'reader reader-m' : 'reader'}>
             <div className="page cover" style={{ background: b.color, color: b.ink }}>
-              <span className="kicker">{b.kind === 'manga' ? `MANGA · ${b.by.toUpperCase()}` : 'BOOK'}</span>
+              <span className="kicker">{b.kind === 'manga' ? 'MANGA' : 'BOOK'}</span>
               <h2>{b.title}</h2>
               <b>{b.by}</b>
             </div>
             <div className="page notes">
               <i className="ribbon" />
               <span className="kicker">MY NOTES</span>
-              <span className="lab">WHY I PICKED IT UP</span><p>{b.why}</p>
-              <span className="lab">WHAT STUCK</span><p>{b.stuck}</p>
-              <span className="lab">STATUS</span><p>{b.status}</p>
+              {b.notes.map(([lab, text]) => <span key={lab} style={{ display: 'contents' }}><span className="lab">{lab}</span><p>{text}</p></span>)}
             </div>
           </div>
         </Wrap>
@@ -244,11 +246,6 @@ function CertHUD() {
   return (
     <div className="inspect fade-in">
       <CloseBtn />
-      <div className="inspect-card">
-        <span className="kicker">ON THE WALL</span>
-        <h2>{profile.degree}</h2>
-        <p>{profile.uni}, {profile.year}. Dissertation on predicting mental fatigue from wearable HRV and skin temperature signals.</p>
-      </div>
     </div>
   )
 }
