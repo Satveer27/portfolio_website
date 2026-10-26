@@ -1,13 +1,13 @@
-.bp{position:absolute;inset:0;overflow:hidden;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;background-color:#0c2647;background-image:linear-gradient(rgba(232,244,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(232,244,255,.10) 1px,transparent 1px),linear-gradient(rgba(232,244,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(232,244,255,.04) 1px,transparent 1px);background-size:100px 100px,100px 100px,20px 20px,20px 20px;animation:bpin .5s ease both}
+.bp{position:absolute;inset:0;overflow:hidden;color:#e8f4ff;font-family:'Hanken Grotesk',sans-serif;background-color:#0c2647;background-image:linear-gradient(rgba(232,244,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(232,244,255,.10) 1px,transparent 1px),linear-gradient(rgba(232,244,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(232,244,255,.04) 1px,transparent 1px);background-size:100px 100px,100px 100px,20px 20px,20px 20px;animation:bpin .5s ease both}
 .bp button{font:inherit;color:inherit;cursor:pointer}
 .bp button:focus-visible,.bp a:focus-visible{outline:2px solid #ffd166;outline-offset:3px}
 .bp-glow{position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%,rgba(40,110,200,.35),rgba(0,0,0,0) 60%),radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.45) 100%);pointer-events:none}
 .bp-border{position:absolute;pointer-events:none}.bp-border.a{inset:18px;border:1px solid rgba(232,244,255,.45)}.bp-border.b{inset:24px;border:1px solid rgba(232,244,255,.15)}
-.bp-head{position:absolute;left:48px;right:48px;top:40px;display:flex;justify-content:space-between;align-items:center}
+.bp-head{position:absolute;left:48px;right:48px;top:40px;display:flex;justify-content:space-between;align-items:center;gap:28px}
 .bp-head .kicker{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:3px;color:#8fc3ea;margin-right:18px}
 .bp-head .ttl{font-size:30px;font-weight:700;letter-spacing:-.5px}
-.bp-head nav{display:flex;gap:8px}
-.bp-head nav button{min-height:40px;padding:0 14px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:1px;border:1px solid rgba(232,244,255,.35);background:transparent;transition:background .2s,border-color .2s}
+.bp-head nav{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.bp-head nav button{min-height:40px;padding:0 11px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:1px;border:1px solid rgba(232,244,255,.35);background:transparent;transition:background .2s,border-color .2s}
 .bp-head nav button:hover{border-color:#e8f4ff}
 .bp-head nav button.on{background:#e8f4ff;color:#0c2647}
 .bp-left{position:absolute;left:48px;top:120px;width:500px;display:flex;flex-direction:column;gap:16px;animation:bprise .5s ease both}

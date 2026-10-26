@@ -7,7 +7,7 @@ let fontsHooked = false
 function hookFonts() {
   if (fontsHooked || typeof document === 'undefined' || !document.fonts) return
   fontsHooked = true
-  const faces = ['80px Anton', '40px "Archivo Black"', 'italic 900 40px Archivo', '40px "Instrument Serif"', 'italic 40px "Instrument Serif"', '20px "JetBrains Mono"', '20px "Press Start 2P"', 'bold 40px Caveat', '40px "DM Serif Display"']
+  const faces = ['80px Anton', '40px "Archivo Black"', 'italic 900 40px Archivo', '40px "Newsreader"', 'italic 40px "Newsreader"', '20px "JetBrains Mono"', '20px "Press Start 2P"', 'bold 40px Caveat', '40px "DM Serif Display"']
   Promise.all(faces.map((f) => document.fonts.load(f).catch(() => null))).then(() => registry.forEach((t) => t.userData.redraw()))
 }
 
@@ -51,7 +51,7 @@ export const posterTex = () => makeTex(1400, 980, (g, w, h) => {
   const gr = g.createRadialGradient(w * 0.78, h * 0.22, 10, w * 0.78, h * 0.22, 760); gr.addColorStop(0, 'rgba(70,140,255,.55)'); gr.addColorStop(1, 'rgba(70,140,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h)
   g.strokeStyle = 'rgba(170,215,255,.16)'; g.lineWidth = 2
   for (let i = 0; i < 16; i++) { g.beginPath(); for (let x = 0; x <= w; x += 16) { const y = 120 + i * 24 + Math.sin(x / 95 + i * 0.7) * 11; x ? g.lineTo(x, y) : g.moveTo(x, y) } g.stroke() }
-  g.fillStyle = '#f2ece2'; g.font = 'italic 168px "Instrument Serif", Georgia, serif'; g.fillText('Welcome in.', 80, 560)
+  g.fillStyle = '#f2ece2'; g.font = 'italic 168px "Newsreader", Georgia, serif'; g.fillText('Welcome in.', 80, 560)
   g.fillStyle = '#e8122d'; g.fillRect(88, 610, 120, 8)
   g.fillStyle = '#f2ece2'; g.font = '64px Anton, Impact, sans-serif'; g.fillText('SATVEER GANASAN', 86, 700)
   g.fillStyle = '#9fc3ff'; g.font = '30px "JetBrains Mono", monospace'; g.fillText('BACKEND + AI ENGINEER  ·  PYTHON / FASTAPI', 88, 756)
@@ -141,7 +141,7 @@ export const certTex = () => makeTex(900, 660, (g, w, h) => {
   g.strokeStyle = '#8a6d3b'; g.lineWidth = 5; g.strokeRect(26, 26, w - 52, h - 52); g.lineWidth = 1.5; g.strokeRect(42, 42, w - 84, h - 84)
   g.textAlign = 'center'; g.fillStyle = '#6b5a44'; g.font = '24px Georgia, serif'; g.fillText('UNIVERSITY OF GLASGOW', w / 2, 132)
   g.fillStyle = '#1d1712'; g.font = '30px Georgia, serif'; g.fillText('Integrated Masters in', w / 2, 240)
-  g.font = 'italic 92px "Instrument Serif", Georgia, serif'; g.fillText('Computer Science', w / 2, 340)
+  g.font = 'italic 92px "Newsreader", Georgia, serif'; g.fillText('Computer Science', w / 2, 340)
   g.font = 'italic 38px Georgia, serif'; g.fillText('Satveer Sahaas Ganasan', w / 2, 440); g.font = '24px Georgia, serif'; g.fillText('2026', w / 2, 510)
 })
 
@@ -186,8 +186,8 @@ function drawSpine(g, w, h, title, color, ink, foot) {
   const sh = g.createLinearGradient(0, 0, w, 0); sh.addColorStop(0, 'rgba(0,0,0,.4)'); sh.addColorStop(0.25, 'rgba(255,255,255,.1)'); sh.addColorStop(0.7, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,.45)'); g.fillStyle = sh; g.fillRect(0, 0, w, h)
   g.fillStyle = ink; g.globalAlpha = 0.85; g.fillRect(8, 24, w - 16, 2); g.fillRect(8, h - 66, w - 16, 2); g.globalAlpha = 1
   g.save(); g.translate(w / 2 + 8, 40); g.rotate(Math.PI / 2); g.fillStyle = ink
-  let size = 28; g.font = `${size}px "Instrument Serif", Georgia, serif`
-  while (g.measureText(title).width > h - 120 && size > 13) { size -= 2; g.font = `${size}px "Instrument Serif", Georgia, serif` }
+  let size = 28; g.font = `${size}px "Newsreader", Georgia, serif`
+  while (g.measureText(title).width > h - 120 && size > 13) { size -= 2; g.font = `${size}px "Newsreader", Georgia, serif` }
   g.fillText(title, 0, 0); g.restore()
   if (foot) { g.fillStyle = ink; g.textAlign = 'center'; g.font = '20px Anton, Impact, sans-serif'; g.fillText(foot, w / 2, h - 28) }
 }
@@ -231,7 +231,7 @@ export const bookCoverTex = (b) => makeTex(512, 720, (g, W, H) => {
   g.fillStyle = b.color; g.fillRect(0, 0, w, h)
   for (let i = 0; i < 2500; i++) { g.fillStyle = `rgba(${r() > 0.5 ? '255,255,255' : '0,0,0'},${r() * 0.06})`; g.fillRect(r() * w, r() * h, 2, 2) }
   g.fillStyle = b.ink; g.globalAlpha = 0.8; g.fillRect(20, 20, w - 40, 2); g.fillRect(20, h - 22, w - 40, 2); g.globalAlpha = 1
-  g.font = '30px "Instrument Serif", Georgia, serif'
+  g.font = '30px "Newsreader", Georgia, serif'
   const words = b.title.split(' '); const lines = []; let line = ''
   words.forEach((wd) => { const t = line ? line + ' ' + wd : wd; if (g.measureText(t).width > w - 44) { lines.push(line); line = wd } else line = t })
   lines.push(line)
